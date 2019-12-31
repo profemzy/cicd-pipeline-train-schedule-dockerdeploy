@@ -29,7 +29,7 @@ pipeline {
            steps {
 
                script {
-                           docker.withRegistry("https://686233958969.dkr.ecr.eu-west-1.amazonaws.com", "ecr.eu-west-1:aws_ecr_login") {
+                           docker.withRegistry("https://686233958969.dkr.ecr.eu-west-1.amazonaws.com", "aws_ecr_login") {
                                    app.push("${env.BUILD_NUMBER}")
                                    app.push("latest")
                            }
@@ -44,9 +44,13 @@ pipeline {
             steps {
                 input 'Deploy to Production?'
                 milestone(1)
+
                 withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     script {
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"$(aws ecr get-login --no-include-email --region eu-west-1)\""
+
+                        withCredentials([usernamePassword(credentialsId: 'aws_ecr_login', usernameVariable: 'AWS_USERNAME', passwordVariable: 'AWS_USERPASS')]){
+                                   sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker login -u $AWS_USERNAME -p $AWS_USERPASS \""
+                         }
                         sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:${env.BUILD_NUMBER}\""
                         try {
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule\""
