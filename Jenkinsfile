@@ -12,27 +12,17 @@ pipeline {
             when {
                 branch 'master'
             }
-            steps {
-                script {
-                    app = docker.build -t ("train-schedule:latest 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest")
-                    app.inside {
-                        sh 'echo $(curl localhost:8080)'
-                    }
-                }
-            }
+            sh "docker.build -t train-schedule:latest 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest"
         }
         stage('Push Docker Image') {
             when {
                 branch 'master'
             }
-            steps {
-                script {
-                    docker.withRegistry('https://686233958969.dkr.ecr.eu-west-1.amazonaws.com', 'aws_ecr_login') {
-                        app.push("${env.BUILD_NUMBER}")
-                        app.push("latest")
+
+             docker.withRegistry('https://686233958969.dkr.ecr.eu-west-1.amazonaws.com', 'aws_ecr_login') {
+                        sh "docker push 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest"
                     }
-                }
-            }
+              }
         }
         stage('DeployToProduction') {
             when {
