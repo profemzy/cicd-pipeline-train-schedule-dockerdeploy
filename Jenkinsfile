@@ -9,12 +9,23 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
-            sh "docker.build -t train-schedule:latest 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest"
+            steps {
+                     script {
+                                docker.build -t train-schedule:latest 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest
+                     }
+            }
         }
         stage('Push Docker Image') {
-             docker.withRegistry('https://686233958969.dkr.ecr.eu-west-1.amazonaws.com', 'aws_ecr_login') {
-                        sh "docker push 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest"
-                    }
+
+           steps {
+
+               script {
+                           docker.withRegistry('https://686233958969.dkr.ecr.eu-west-1.amazonaws.com', 'aws_ecr_login') {
+                                   docker push 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:latest
+                           }
+               }
+
+           }
         }
         stage('DeployToProduction') {
             when {
