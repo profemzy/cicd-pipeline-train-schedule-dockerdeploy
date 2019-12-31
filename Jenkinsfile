@@ -48,10 +48,10 @@ pipeline {
                 withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     script {
 
-                        withCredentials([usernamePassword(credentialsId: 'aws_ecr_login', usernameVariable: 'AWS_USERNAME', passwordVariable: 'AWS_USERPASS')]){
-                                   sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker login -u $AWS_USERNAME -p $AWS_USERPASS \""
+                         docker.withRegistry("https://686233958969.dkr.ecr.eu-west-1.amazonaws.com", "aws_ecr_login") {
+                                  sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:${env.BUILD_NUMBER}\""                      
                          }
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull 686233958969.dkr.ecr.eu-west-1.amazonaws.com/train-schedule:${env.BUILD_NUMBER}\""
+    
                         try {
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule\""
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker rm train-schedule\""
