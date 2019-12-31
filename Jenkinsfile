@@ -29,7 +29,7 @@ pipeline {
            steps {
 
                script {
-                           docker.withRegistry("https://686233958969.dkr.ecr.eu-west-1.amazonaws.com", "ecr.eu-west-1:aws_ecr_login") {
+                           docker.withRegistry("https://686233958969.dkr.ecr.eu-west-1.amazonaws.com", "aws_ecr_login") {
                                    app.push("${env.BUILD_NUMBER}")
                                    app.push("latest")
                            }
